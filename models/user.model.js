@@ -24,6 +24,15 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
+  languages: {
+    type: [String], // Array of strings
+    required: false,
+  },
+  city: {
+    type: String,
+    required: false,
+  },
+
   phone: {
     type: String,
     required: false,
@@ -49,7 +58,52 @@ const userSchema = new Schema({
     type: String,
     required: false,
   },
-
+  //add field is acoount complete and verified
+  isComplete: {
+    type: Boolean,
+    default:false
+  },
+  isVerified: {
+    type: Boolean,
+    default:false
+  },
+  //has car
+  hasCar: {
+    type: Boolean,
+    required: false,
+  },
+  //has scooter
+  hasScooter: {
+    type: Boolean,
+    required: false,
+  },
+  //car price
+  carPrice: {
+    type: Number,
+    required: false,
+  },
+  //scooter price
+  scooterPrice: {
+    type: Number,
+    required: false,
+  },
+  //add price
+  price: {
+    type: Number,
+    required: false,
+  },
+  location: {
+    type: String,
+    required: false,
+  },
+  availabilityDays: {
+    type: [String],
+    required: false,
+  },
+  availabilityHours: {
+    type: [String],
+    required: false,
+  },
 },{
   timestamps:true
 });

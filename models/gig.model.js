@@ -67,6 +67,25 @@ const GigSchema = new Schema(
       type: Number,
       default: 0,
     },
+    // field d for disponibilty times of week
+    d: {
+      type: [String],
+      required: false,
+    },
+    // field h for disponibilty hours of day
+    h: {
+      type: [String],
+      required: false,
+    },
+    // field for location
+    location: {
+      type: String,
+      required: false,
+    },
+    
+
+
+
   },
   {
     timestamps: true,

@@ -3,7 +3,7 @@ import { getCountries, createCountry } from "../controllers/country.controller.j
 
 const router = express.Router();
 
-router.get("/countries", getCountries);
-router.post("/countries", createCountry);
+router.get("/", getCountries);
+router.post("/", createCountry);
 
 export default router;

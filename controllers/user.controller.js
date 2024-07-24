@@ -15,3 +15,19 @@ export const getUser = async (req, res, next) => {
 
   res.status(200).send(user);
 };
+// controllers/user.controller.js
+
+
+export const updateProfile = async (req, res, next) => {
+  try {
+    const { languages, hasCar, hasScooter, price } = req.body;
+    const updatedUser = await User.findByIdAndUpdate(
+      req.userId,
+      { languages, hasCar, hasScooter, price, isComplete: true }, // Mark profile as complete
+      { new: true }
+    );
+    res.status(200).json(updatedUser);
+  } catch (err) {
+    next(createError(500, "Error updating profile"));
+  }
+};
