@@ -2,8 +2,12 @@ import Gig from "../models/gig.model.js";
 import createError from "../utils/createError.js";
 
 export const createGig = async (req, res, next) => {
-  if (!req.isSeller)
-    return next(createError(403, "Only sellers can create a gig!"));
+  // Uncomment if you want to check user roles
+  // if (req.isSeller)
+  //   return next(createError(403, "Only sellers can create a gig!"));
+
+  console.log('Request Body:', req.body); // Log the request body
+  console.log('User ID:', req.userId); // Log the user ID
 
   const newGig = new Gig({
     userId: req.userId,
@@ -14,9 +18,11 @@ export const createGig = async (req, res, next) => {
     const savedGig = await newGig.save();
     res.status(201).json(savedGig);
   } catch (err) {
+    console.error('Error saving gig:', err); // Log the error
     next(err);
   }
 };
+
 export const deleteGig = async (req, res, next) => {
   try {
     const gig = await Gig.findById(req.params.id);
@@ -38,8 +44,10 @@ export const getGig = async (req, res, next) => {
     next(err);
   }
 };
+
 export const getGigs = async (req, res, next) => {
   const q = req.query;
+  console.log(q);
   const filters = {
     ...(q.userId && { userId: q.userId }),
     ...(q.cat && { cat: q.cat }),

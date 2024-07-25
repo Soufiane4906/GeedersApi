@@ -23,40 +23,29 @@ const GigSchema = new Schema(
       type: Number,
       default: 0,
     },
-    cat: {
-      type: String,
-      required: true,
+    //age
+    //Location
+    //Date of birth
+    age: {
+      type: Date,
+      required: false,
     },
+    location: {
+      type: String,
+      required: false,
+    },
+
+
     price: {
       type: Number,
-      required: true,
-    },
-    cover: {
-      type: String,
       required: true,
     },
     images: {
       type: [String],
       required: false,
     },
-    userId: {
-      type: String,
-      required: true,
-    },
-    shortTitle: {
-      type: String,
-      required: true,
-    },
     shortDesc: {
       type: String,
-      required: true,
-    },
-    deliveryTime: {
-      type: Number,
-      required: true,
-    },
-    revisionNumber: {
-      type: Number,
       required: true,
     },
     features: {
@@ -67,29 +56,40 @@ const GigSchema = new Schema(
       type: Number,
       default: 0,
     },
-    // field d for disponibilty times of week
-    d: {
-      type: [String],
-      required: false,
+    availabilityTimes: {
+      type: [String], // Changed to an array of time slots
+      required: true,
     },
-    // field h for disponibilty hours of day
-    h: {
-      type: [String],
-      required: false,
+    hasCar: {
+      type: Boolean,
+      default: false,
     },
-    // field for location
-    location: {
+    carPrice: {
+      type: Number,
+      required: function() {
+        return this.hasCar;
+      },
+    },
+    hasScooter: {
+      type: Boolean,
+      default: false,
+    },
+    scooterPrice: {
+      type: Number,
+      required: function() {
+        return this.hasScooter;
+      },
+    },
+    city: {
       type: String,
-      required: false,
+      required: true,
     },
-    
-
-
-
+    country: {
+      type: String,
+      required: true,
+    },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 export default mongoose.model("Gig", GigSchema);

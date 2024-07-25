@@ -67,43 +67,23 @@ const userSchema = new Schema({
     type: Boolean,
     default:false
   },
-  //has car
-  hasCar: {
-    type: Boolean,
+  //age
+  age: {
+    type: String,
     required: false,
   },
-  //has scooter
-  hasScooter: {
-    type: Boolean,
+  //bankCardNumber
+  bankCardNumber: {
+    type: String,
     required: false,
   },
-  //car price
-  carPrice: {
-    type: Number,
-    required: false,
-  },
-  //scooter price
-  scooterPrice: {
-    type: Number,
-    required: false,
-  },
-  //add price
-  price: {
-    type: Number,
-    required: false,
-  },
+
+
   location: {
     type: String,
     required: false,
   },
-  availabilityDays: {
-    type: [String],
-    required: false,
-  },
-  availabilityHours: {
-    type: [String],
-    required: false,
-  },
+
 },{
   timestamps:true
 });
