@@ -29,7 +29,10 @@ export const createMessage = async (req, res, next) => {
 };
 export const getMessages = async (req, res, next) => {
   try {
-    const messages = await Message.find({ conversationId: req.params.id });
+    const messages = await Message.find({ conversationId: req.params.id
+    //get user.img and username from messages.userId
+    
+    });
     res.status(200).send(messages);
   } catch (err) {
     next(err);

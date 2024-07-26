@@ -48,15 +48,57 @@ export const getGig = async (req, res, next) => {
 export const getGigs = async (req, res, next) => {
   const q = req.query;
   console.log(q);
-  const filters = {
-    ...(q.userId && { userId: q.userId }),
-    ...(q.city && { city: q.city }),
-    ...(q.country && { country: q.country }),
-    
 
-  };
+  // Define the filters based on query parameters
+  const filters = {};
+
+  if (q.country) {
+    filters.country = q.country;
+    //console both
+    console.log(q.country);
+    console.log(filters.country);
+  }
+
+  if (q.city) {
+    filters.city = q.city;
+    //console both
+    console.log(q.city);
+    console.log(filters.city);
+  }
+
+  if (q.languages) {
+    filters.languages = q.languages;
+    //console both
+    console.log(q.languages);
+    console.log(filters.languages);
+  }
+
+  // if (q.vehicles) {
+  //   // Handle vehicle filtering based on the query parameter
+  //   const vehicles = q.vehicles.split(',').map(v => v.trim());
+  //   filters.$or = [
+  //     { hasCar: vehicles.includes('car') },
+  //     { hasScooter: vehicles.includes('scooter') },
+  //   ];
+  // }
+
+  if (q.sort) {
+    // Ensure sorting is applied if specified
+    const sortBy = q.sort;
+    filters.sort = { [sortBy]: -1 };
+  }
+
   try {
-    const gigs = await Gig.find(filters).sort({ [q.sort]: -1 });
+    // Fetch the gigs based on the filters
+    const gigs = await Gig.find(filters).sort(filters.sort || {});
+    //console both
+    console.log("---------------giigs---------------------------");
+    console.log(gigs);
+    console.log("-----------------fi-------------------------");
+
+    console.log(filters);
+    console.log("------------------------------------------");
+
     res.status(200).send(gigs);
   } catch (err) {
     next(err);

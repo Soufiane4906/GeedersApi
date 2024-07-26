@@ -30,9 +30,17 @@ export const intent = async (req, res, next) => {
   res.status(200).send({
     clientSecret: paymentIntent.client_secret,
   });
+
+  console.log('newOrder' ,newOrder);
+  //paymentIntent
+  console.log(paymentIntent);
+
 };
 
 export const getOrders = async (req, res, next) => {
+  //console req
+  console.log(req.userId);
+
   try {
     const orders = await Order.find({
       ...(req.isSeller ? { sellerId: req.userId } : { buyerId: req.userId }),

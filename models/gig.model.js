@@ -11,7 +11,7 @@ const GigSchema = new Schema(
       type: String,
       required: true,
     },
- 
+
     totalStars: {
       type: Number,
       default: 0,
@@ -31,7 +31,11 @@ const GigSchema = new Schema(
       type: String,
       required: false,
     },
-
+//cover
+    cover: {
+      type: String,
+      required: false,
+    },
 
     price: {
       type: Number,
