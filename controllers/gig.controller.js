@@ -50,14 +50,10 @@ export const getGigs = async (req, res, next) => {
   console.log(q);
   const filters = {
     ...(q.userId && { userId: q.userId }),
-    ...(q.cat && { cat: q.cat }),
-    ...((q.min || q.max) && {
-      price: {
-        ...(q.min && { $gt: q.min }),
-        ...(q.max && { $lt: q.max }),
-      },
-    }),
-    ...(q.search && { title: { $regex: q.search, $options: "i" } }),
+    ...(q.city && { city: q.city }),
+    ...(q.country && { country: q.country }),
+    
+
   };
   try {
     const gigs = await Gig.find(filters).sort({ [q.sort]: -1 });
