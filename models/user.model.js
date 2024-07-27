@@ -7,6 +7,15 @@ const userSchema = new Schema({
     required: true,
     unique: true,
   },
+  //first name and last name
+  firstName: {
+    type: String,
+    required: false,
+  },
+  lastName: {
+    type: String,
+    required: false,
+  },
   email: {
     type: String,
     required: true,
@@ -74,6 +83,11 @@ const userSchema = new Schema({
   },
   //bankCardNumber
   bankCardNumber: {
+    type: String,
+    required: false,
+  },
+  //paypalCardNumber
+  paypalCardNumber: {
     type: String,
     required: false,
   },
