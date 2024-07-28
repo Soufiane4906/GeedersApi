@@ -1,5 +1,6 @@
 import Gig from "../models/gig.model.js";
 import createError from "../utils/createError.js";
+import User from '../models/user.model.js'; // Adjust the path as needed
 
 export const createGig = async (req, res, next) => {
   // Uncomment if you want to check user roles
@@ -51,54 +52,48 @@ export const getGigs = async (req, res, next) => {
 
   // Define the filters based on query parameters
   const filters = {};
+  if (q.userId) {
+    filters.userId = q.userId;
+    console.log('User ID filter:', q.userId);
+  }
 
   if (q.country) {
     filters.country = q.country;
-    //console both
     console.log(q.country);
     console.log(filters.country);
   }
 
   if (q.city) {
     filters.city = q.city;
-    //console both
     console.log(q.city);
     console.log(filters.city);
   }
 
   if (q.languages) {
-    filters.languages = q.languages;
-    //console both
+    const languages = q.languages.split(',').map(lang => lang.trim());
+    try {
+      const users = await User.find({ languages: { $in: languages } });
+      const userIds = users.map(user => user._id);
+      filters.userId = { $in: userIds };
+    } catch (err) {
+      return next(err);
+    }
     console.log(q.languages);
-    console.log(filters.languages);
+    console.log(filters.userId);
   }
 
-  // if (q.vehicles) {
-  //   // Handle vehicle filtering based on the query parameter
-  //   const vehicles = q.vehicles.split(',').map(v => v.trim());
-  //   filters.$or = [
-  //     { hasCar: vehicles.includes('car') },
-  //     { hasScooter: vehicles.includes('scooter') },
-  //   ];
-  // }
-
-  if (q.sort) {
-    // Ensure sorting is applied if specified
-    const sortBy = q.sort;
-    filters.sort = { [sortBy]: -1 };
+  // Handle sorting
+  let sortOption = {};
+  if (q.sort === 'sales') {
+    sortOption = { sales: -1 }; // Example for best-selling
+  } else if (q.sort === 'popularity') {
+    sortOption = { stars: -1 }; // Example for popularity
+  } else if (q.sort === 'createdAt') {
+    sortOption = { createdAt: -1 }; // Newest
   }
 
   try {
-    // Fetch the gigs based on the filters
-    const gigs = await Gig.find(filters).sort(filters.sort || {});
-    //console both
-    console.log("---------------giigs---------------------------");
-    console.log(gigs);
-    console.log("-----------------fi-------------------------");
-
-    console.log(filters);
-    console.log("------------------------------------------");
-
+    const gigs = await Gig.find(filters).sort(sortOption);
     res.status(200).send(gigs);
   } catch (err) {
     next(err);

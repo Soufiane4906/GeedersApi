@@ -7,6 +7,8 @@ const GigSchema = new Schema(
       type: String,
       required: true,
     },
+    //totalPrice
+
     title: {
       type: String,
       required: true,
@@ -40,6 +42,10 @@ const GigSchema = new Schema(
     price: {
       type: Number,
       required: true,
+    },
+    totalPrice: {
+      type: Number,
+      required: false,
     },
     images: {
       type: [String],
@@ -88,6 +94,11 @@ const GigSchema = new Schema(
     country: {
       type: String,
       required: true,
+    },
+    //string list non required poi
+    poi: {
+      type: [String],
+      required: false,
     },
   },
   { timestamps: true }
