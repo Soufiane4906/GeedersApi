@@ -76,6 +76,7 @@ const userSchema = new Schema({
     type: Boolean,
     default:false
   },
+
   //age
   age: {
     type: String,
@@ -88,6 +89,21 @@ const userSchema = new Schema({
   },
   //paypalCardNumber
   paypalCardNumber: {
+    type: String,
+    required: false,
+  },
+  //applepay
+  applepay: {
+    type: String,
+    required: false,
+  },
+  //googlepay
+  accountNumber: {
+    type: String,
+    required: false,
+  },
+  //payment method
+  paymentMethod: {
     type: String,
     required: false,
   },

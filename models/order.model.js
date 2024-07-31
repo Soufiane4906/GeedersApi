@@ -35,6 +35,28 @@ const OrderSchema = new Schema(
       type: String,
       required: true,
     },
+    totalprice: {
+      type: Number,
+      required: false,
+    },
+
+   //location as string
+    location: {
+      type: String,
+      required: false,
+    },
+    options: {
+      type: {
+        car: Boolean,
+        scooter: Boolean,
+      },
+      required: false,
+    },
+    //hour
+    duration: {
+      type: Number,
+      required: false,
+    },
   },
   {
     timestamps: true,

@@ -47,6 +47,18 @@ const GigSchema = new Schema(
       type: Number,
       required: false,
     },
+    //latitude and longtitude
+    latitude: {
+      type: Number,
+      required: false,
+    },
+    longitude: {
+      type: Number,
+      required: false,
+    },
+
+
+
     images: {
       type: [String],
       required: false,
