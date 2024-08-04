@@ -26,7 +26,7 @@ const connect = async () => {
   }
 };
 
-app.use(cors({ origin: "https://geedersfront.onrender.com", credentials: true }));
+app.use(cors({ origin: "*", credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 
