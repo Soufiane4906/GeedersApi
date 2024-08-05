@@ -5,10 +5,10 @@ import { getOrders, intent, confirm , getOrder} from "../controllers/order.contr
 const router = express.Router();
 
 // router.post("/:gigId", verifyToken, createOrder);
-router.get("/", verifyToken, getOrders);
-router.post("/create-payment-intent/:id", verifyToken, intent);
-router.put("/", verifyToken, confirm);
+router.get("/", getOrders);
+router.post("/create-payment-intent/:id", intent);
+router.put("/", confirm);
 //get single order
- router.get("/:id", verifyToken, getOrder);
+ router.get("/:id", getOrder);
 
 export default router;
