@@ -7,12 +7,11 @@ import Stripe from "stripe";
 
 export const intent = async (req, res, next) => {
   const stripe = new Stripe(process.env.STRIPE);
-  const { totalPrice, city , country , options, hours } = req.body; // Retrieve new fields from the request body
+  const { totalPrice, city , country , options, hours, buyerId } = req.body; // Retrieve new fields from the request body
 
   // Console total price and other data for debugging
-  console.log("Total Price:", totalPrice);
-  console.log("Options:", options);
-  console.log("Hours:", hours);
+  console.log("Buyer Id---------------------", buyerId);
+
 
   const gig = await Gig.findById(req.params.id);
 
@@ -28,7 +27,7 @@ export const intent = async (req, res, next) => {
     gigId: gig._id,
     img: gig.cover,
     title: gig.title,
-    buyerId: req.userId,
+    buyerId,
     sellerId: gig.userId,
     price: gig.price,
     totalprice: totalPrice, // Store total price in the order
@@ -37,6 +36,7 @@ export const intent = async (req, res, next) => {
     duration: hours, // Store duration in the orde
     location: `${city}, ${country}`, // Store location in the order
   });
+  console.log(newOrder);
 
   try {
     await newOrder.save();
@@ -47,8 +47,6 @@ export const intent = async (req, res, next) => {
     next(err);
   }
 
-  console.log('newOrder', newOrder);
-  console.log(paymentIntent);
 };
 
 
