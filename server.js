@@ -10,7 +10,6 @@ import reviewRoute from "./routes/review.route.js";
 import authRoute from "./routes/auth.route.js";
 import cookieParser from "cookie-parser";
 import countryRoutes from "./routes/country.route.js"; // Correctly import this
-
 import cors from "cors";
 
 const app = express();
@@ -26,7 +25,25 @@ const connect = async () => {
   }
 };
 
-app.use(cors({ origin: "https://geeders.com", credentials: true }));
+const allowedOrigins = [
+  'https://geeders.com',
+  'https://geeders.eu',
+  'https://geeders.fr',
+  'http://localhost:5173',
+  'http://localhost:5174',
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -39,11 +56,9 @@ app.use("/api/messages", messageRoute);
 app.use("/api/reviews", reviewRoute);
 app.use("/api/countries", countryRoutes);
 
-
 app.use((err, req, res, next) => {
   const errorStatus = err.status || 500;
   const errorMessage = err.message || "Something went wrong!";
-
   return res.status(errorStatus).send(errorMessage);
 });
 
