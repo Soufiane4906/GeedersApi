@@ -8,9 +8,10 @@ import conversationRoute from "./routes/conversation.route.js";
 import messageRoute from "./routes/message.route.js";
 import reviewRoute from "./routes/review.route.js";
 import authRoute from "./routes/auth.route.js";
-import cookieParser from "cookie-parser";
 import countryRoutes from "./routes/country.route.js"; // Correctly import this
+import cookieParser from "cookie-parser";
 import cors from "cors";
+import path from 'path';
 
 const app = express();
 dotenv.config();
@@ -47,6 +48,10 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
+// Serve static files from the React app
+const __dirname = path.resolve();
+app.use(express.static(path.join(__dirname, 'dist')));
+
 app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
 app.use("/api/gigs", gigRoute);
@@ -55,6 +60,11 @@ app.use("/api/conversations", conversationRoute);
 app.use("/api/messages", messageRoute);
 app.use("/api/reviews", reviewRoute);
 app.use("/api/countries", countryRoutes);
+
+// Catch-all route to serve the React app's index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
 
 app.use((err, req, res, next) => {
   const errorStatus = err.status || 500;
