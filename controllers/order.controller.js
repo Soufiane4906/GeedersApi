@@ -10,7 +10,6 @@ export const intent = async (req, res, next) => {
   const { totalPrice, city , country , options, hours, buyerId } = req.body; // Retrieve new fields from the request body
 
   // Console total price and other data for debugging
-  console.log("Buyer Id---------------------", buyerId);
 
 
   const gig = await Gig.findById(req.params.id);
@@ -36,7 +35,6 @@ export const intent = async (req, res, next) => {
     duration: hours, // Store duration in the orde
     location: `${city}, ${country}`, // Store location in the order
   });
-  console.log(newOrder);
 
   try {
     await newOrder.save();
@@ -53,7 +51,6 @@ export const intent = async (req, res, next) => {
 
 export const getOrders = async (req, res, next) => {
   //console req
-  console.log(req.userId);
 
   try {
     const orders = await Order.find({
@@ -93,8 +90,6 @@ export const getOrder = async (req, res, next) => {
     if (!order) {
       return res.status(404).send({ message: "Order not found" });
     }
-    //console
-    console.log(order);
 
     // Fetch seller info
     const seller = await User.findById(order.sellerId);

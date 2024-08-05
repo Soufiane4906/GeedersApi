@@ -21,7 +21,6 @@ export const updateProfile = async (req, res, next) => {
     const { username, location, age , languages , bankCardNumber, country, email } = req.body;
 
     // Log the incoming data
-    console.log('Update Profile Data:', { username, age , languages,  country , bankCardNumber,  location, email });
 
     const updatedUser = await User.findByIdAndUpdate(
       req.userId,

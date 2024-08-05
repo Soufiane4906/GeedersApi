@@ -17,8 +17,7 @@ export const register = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-};
-export const login = async (req, res, next) => {
+};export const login = async (req, res, next) => {
   try {
     const user = await User.findOne({ username: req.body.username });
 
@@ -40,6 +39,8 @@ export const login = async (req, res, next) => {
     res
       .cookie("accessToken", token, {
         httpOnly: true,
+        secure: true, // Ensure the cookie is only sent over HTTPS
+        sameSite: "none", // This allows cross-origin cookies
       })
       .status(200)
       .send(info);

@@ -3,7 +3,6 @@ import { Country } from "../models/country.model.js";
 export const getCountries = async (req, res, next) => {
   try {
     const countries = await Country.find();
-    console.log(countries);
     res.status(200).json(countries);
   } catch (err) {
     next(err);

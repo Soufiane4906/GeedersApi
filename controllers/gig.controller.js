@@ -7,8 +7,7 @@ export const createGig = async (req, res, next) => {
   // if (req.isSeller)
   //   return next(createError(403, "Only sellers can create a gig!"));
 
-  console.log('Request Body:', req.body); // Log the request body
-  console.log('User ID:', req.userId); // Log the user ID
+
 
   const newGig = new Gig({
     userId: req.userId,
@@ -48,25 +47,21 @@ export const getGig = async (req, res, next) => {
 
 export const getGigs = async (req, res, next) => {
   const q = req.query;
-  console.log(q);
 
   // Define the filters based on query parameters
   const filters = {};
   if (q.userId) {
     filters.userId = q.userId;
-    console.log('User ID filter:', q.userId);
   }
 
   if (q.country) {
     filters.country = q.country;
-    console.log(q.country);
-    console.log(filters.country);
+
   }
 
   if (q.city) {
     filters.city = q.city;
-    console.log(q.city);
-    console.log(filters.city);
+
   }
 
   if (q.languages) {
@@ -78,8 +73,7 @@ export const getGigs = async (req, res, next) => {
     } catch (err) {
       return next(err);
     }
-    console.log(q.languages);
-    console.log(filters.userId);
+
   }
 
   // Handle sorting
