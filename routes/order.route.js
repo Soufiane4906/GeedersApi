@@ -6,7 +6,7 @@ const router = express.Router();
 
 // router.post("/:gigId", verifyToken, createOrder);
 router.get("/", verifyToken, getOrders);
-router.post("/create-payment-intent/:id", intent);
+router.post("/create-payment-intent/:id", verifyToken, intent);
 router.put("/", verifyToken, confirm);
 //get single order
  router.get("/:id", verifyToken, getOrder);
