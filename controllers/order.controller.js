@@ -8,6 +8,7 @@ import Stripe from "stripe";
 export const intent = async (req, res, next) => {
   const stripe = new Stripe(process.env.STRIPE);
   const { totalPrice, city , country , options, hours, buyerId } = req.body; // Retrieve new fields from the request body
+  console.log("buyerId,",buyerId);
 
   // Console total price and other data for debugging
 
