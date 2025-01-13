@@ -19,7 +19,7 @@ mongoose.set("strictQuery", true);
 
 const connect = async () => {
   try {
-    mongoose.connect(process.env.MONGO);
+    mongoose.connect("mongodb+srv://soufiane:gogo@cluster0.05omqhe.mongodb.net/v3?retryWrites=true&w=majority&appName=Cluster0");
     console.log("Connected to mongoDB!");
   } catch (error) {
     console.log(error);
