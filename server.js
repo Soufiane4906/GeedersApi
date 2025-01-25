@@ -27,11 +27,10 @@ const connect = async () => {
 };
 //
 const allowedOrigins = [
-  'https://geeders.com',
-  'https://geeders.eu',
-  'https://geeders.fr',
-  'http://localhost:5173',
-  'http://localhost:5174',
+  'https://blablatrip.com',
+  'https://www.blablatrip.com',
+    'http://localhost:5174',
+  'http://localhost:3000', // Optional, for local development
 ];
 
 app.use(cors({
