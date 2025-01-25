@@ -29,7 +29,8 @@ const connect = async () => {
 const allowedOrigins = [
   'https://blablatrip.com',
   'https://www.blablatrip.com',
-    'http://localhost:5174',
+    'http://105.75.240.99:5174',
+
   'http://localhost:3000', // Optional, for local development
 ];
 
