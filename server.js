@@ -12,11 +12,15 @@ import countryRoutes from "./routes/country.route.js"; // Correctly import this
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from 'path';
+import https from 'https';
+import fs from 'fs';
 
+// Initialize app and dotenv
 const app = express();
 dotenv.config();
 mongoose.set("strictQuery", true);
 
+// MongoDB connection
 const connect = async () => {
   try {
     await mongoose.connect("mongodb+srv://soufiane:gogo@cluster0.05omqhe.mongodb.net/v7?retryWrites=true&w=majority&appName=Cluster0");
@@ -25,12 +29,13 @@ const connect = async () => {
     console.log(error);
   }
 };
-//
+
+// CORS configuration
 const allowedOrigins = [
-    'https://www.blablatrip.com',
+  'https://www.blablatrip.com',
   'https://blablatrip.com',
   'https://www.blablatrip.com',
-    'http://105.75.240.99:5174',
+  'http://105.75.240.99:5174',
   'http://localhost:5174',
   'http://localhost:5173', // Optional, for local development
 ];
@@ -53,6 +58,7 @@ app.use(cookieParser());
 const __dirname = path.resolve();
 app.use(express.static(path.join(__dirname, 'dist')));
 
+// Routes
 app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
 app.use("/api/gigs", gigRoute);
@@ -67,13 +73,21 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
+// Error handler
 app.use((err, req, res, next) => {
   const errorStatus = err.status || 500;
   const errorMessage = err.message || "Something went wrong!";
   return res.status(errorStatus).send(errorMessage);
 });
 
-app.listen(8800, () => {
+// SSL certificates
+const options = {
+  key: fs.readFileSync('/etc/letsencrypt/live/blablatrip.com/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/blablatrip.com/fullchain.pem'),
+};
+
+// Start HTTPS server
+https.createServer(options, app).listen(8800, () => {
   connect();
-  console.log("Backend server is running!");
+  console.log("Backend server is running on https://localhost:8800");
 });
