@@ -56,7 +56,7 @@ app.use(cookieParser());
 
 // Serve static files from the React app
 const __dirname = path.resolve();
-app.use(express.static(path.join(__dirname, 'dist')));
+app.use(express.static(path.join(__dirname, 'build')));
 
 // Routes
 app.use("/api/auth", authRoute);
@@ -70,7 +70,7 @@ app.use("/api/countries", countryRoutes);
 
 // Catch-all route to serve the React app's index.html
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
 // Error handler
