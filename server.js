@@ -8,37 +8,32 @@ import conversationRoute from "./routes/conversation.route.js";
 import messageRoute from "./routes/message.route.js";
 import reviewRoute from "./routes/review.route.js";
 import authRoute from "./routes/auth.route.js";
-import countryRoutes from "./routes/country.route.js"; // Correctly import this
+import countryRoutes from "./routes/country.route.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from 'path';
-import https from 'https';
-import fs from 'fs';
+import os from 'os'; // Import the 'os' module to get network interfaces
 
-// Initialize app and dotenv
 const app = express();
 dotenv.config();
-mongoose.set("strictQuery", true);
 
-// MongoDB connection
+const mongoUrl = process.env.MONGO_URI;
+const nodeEnv = process.env.NODE_ENV || 'development';
+const strictQuery = process.env.STRICT_QUERY === 'true'; // Convert string to boolean
+const port = process.env.PORT || 8800; // Use PORT from .env or default to 8800
+
+mongoose.set('strictQuery', strictQuery);
+
 const connect = async () => {
   try {
-    await mongoose.connect("mongodb+srv://soufiane:gogo@cluster0.05omqhe.mongodb.net/v7?retryWrites=true&w=majority&appName=Cluster0");
+    await mongoose.connect(mongoUrl);
     console.log("Connected to mongoDB!");
   } catch (error) {
     console.log(error);
   }
 };
 
-// CORS configuration
-const allowedOrigins = [
-  'https://www.blablatrip.com',
-  'https://blablatrip.com',
-  'https://www.blablatrip.com',
-  'http://105.75.240.99:5174',
-  'http://localhost:5174',
-  'http://localhost:5173', // Optional, for local development
-];
+const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [];
 
 app.use(cors({
   origin: function (origin, callback) {
@@ -54,11 +49,6 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-// Serve static files from the React app
-const __dirname = path.resolve();
-app.use(express.static(path.join(__dirname, 'build')));
-
-// Routes
 app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
 app.use("/api/gigs", gigRoute);
@@ -68,26 +58,30 @@ app.use("/api/messages", messageRoute);
 app.use("/api/reviews", reviewRoute);
 app.use("/api/countries", countryRoutes);
 
-// Catch-all route to serve the React app's index.html
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
-});
-
-// Error handler
 app.use((err, req, res, next) => {
   const errorStatus = err.status || 500;
   const errorMessage = err.message || "Something went wrong!";
   return res.status(errorStatus).send(errorMessage);
 });
 
-// SSL certificates
-const options = {
-  key: fs.readFileSync('/etc/letsencrypt/live/blablatrip.com/privkey.pem'),
-  cert: fs.readFileSync('/etc/letsencrypt/live/blablatrip.com/fullchain.pem'),
+// Function to get the server's IP address
+const getServerIpAddress = () => {
+  const interfaces = os.networkInterfaces();
+  for (const interfaceName in interfaces) {
+    const interfaceDetails = interfaces[interfaceName];
+    for (const detail of interfaceDetails) {
+      if (detail.family === 'IPv4' && !detail.internal) {
+        return detail.address;
+      }
+    }
+  }
+  return 'localhost'; // Fallback to localhost if no IP is found
 };
 
-// Start HTTPS server
-https.createServer(options, app).listen(8800, () => {
+const serverIpAddress = getServerIpAddress();
+
+app.listen(port, () => {
   connect();
-  console.log("Backend server is running on https://localhost:8800");
+  console.log(`Backend server is running in ${nodeEnv} mode on port ${port}!`);
+  console.log(`Server URL: http://${serverIpAddress}:${port}`);
 });

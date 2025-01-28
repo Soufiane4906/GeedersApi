@@ -3,7 +3,8 @@ import {
   createGig,
   deleteGig,
   getGig,
-  getGigs
+  getGigs,
+    getAllGigs
 } from "../controllers/gig.controller.js";
 import { verifyToken } from "../middleware/jwt.js";
 
@@ -35,4 +36,5 @@ router.put('/:id/update-price', async (req, res) => {
   }
 });
 
+router.get("/all" , getAllGigs)
 export default router;

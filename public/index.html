@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gigs List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .gig {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<h1>Gigs List</h1>
+<div id="gigs"></div>
+
+<script>
+    // Fetch data from the /api/gigs/all endpoint
+    fetch('/api/gigs/all')
+        .then(response => response.json())
+        .then(data => {
+            const gigsContainer = document.getElementById('gigs');
+            data.forEach(gig => {
+                const gigElement = document.createElement('div');
+                gigElement.className = 'gig';
+                gigElement.innerHTML = `
+                        <h2>${gig.title}</h2>
+                        <p>${gig.description}</p>
+                        <p><strong>Price:</strong> $${gig.totalPrice}</p>
+                        <p><strong>Created by:</strong> ${gig.userId}</p>
+                    `;
+                gigsContainer.appendChild(gigElement);
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching gigs:', error);
+        });
+</script>
+</body>
+</html>
