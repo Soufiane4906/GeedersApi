@@ -1,13 +1,11 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
-
 const userSchema = new Schema({
   username: {
     type: String,
     required: true,
     unique: true,
   },
-  //first name and last name
   firstName: {
     type: String,
     required: false,
@@ -31,17 +29,20 @@ const userSchema = new Schema({
   },
   country: {
     type: String,
-    required: true,
+    required: false, // Changed from true to match your simplified form
   },
   languages: {
-    type: [String], // Array of strings
+    type: [String],
     required: false,
   },
   city: {
     type: String,
     required: false,
   },
-
+  customCity: {
+    type: String,
+    required: false,
+  },
   phone: {
     type: String,
     required: false,
@@ -52,9 +53,12 @@ const userSchema = new Schema({
   },
   isSeller: {
     type: Boolean,
-    default:false
+    default: false
   },
-  //add more input forr image recto and verso and passeport
+  isAmbassador: {
+    type: Boolean,
+    default: false
+  },
   imgRecto: {
     type: String,
     required: false,
@@ -67,55 +71,28 @@ const userSchema = new Schema({
     type: String,
     required: false,
   },
-  //add field is acoount complete and verified
   isComplete: {
     type: Boolean,
-    default:false
+    default: false
   },
   isVerified: {
     type: Boolean,
-    default:false
+    default: false
   },
-
-  //age
-  age: {
-    type: String,
-    required: false,
-  },
-  //bankCardNumber
-  bankCardNumber: {
-    type: String,
-    required: false,
-  },
-  //paypalCardNumber
-  paypalCardNumber: {
-    type: String,
-    required: false,
-  },
-  //applepay
-  applepay: {
-    type: String,
-    required: false,
-  },
-  //googlepay
   accountNumber: {
     type: String,
     required: false,
   },
-  //payment method
   paymentMethod: {
     type: String,
     required: false,
   },
-
-
   location: {
     type: String,
     required: false,
   },
-
-},{
-  timestamps:true
+}, {
+  timestamps: true
 });
 
-export default mongoose.model("User", userSchema)
+export default mongoose.model("User", userSchema);
