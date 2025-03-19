@@ -18,7 +18,7 @@ export const register = async (req, res, next) => {
     const newUser = new User({
       ...req.body,
       password: hash,
-      username: req.body.firstname  + req.body.lastname,
+      username: req.body.email,
       isVerified: true,
     });
 
