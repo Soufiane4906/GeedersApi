@@ -4,8 +4,8 @@ import User from '../models/user.model.js'; // Adjust the path as needed
 
 export const createGig = async (req, res, next) => {
   // Uncomment if you want to check user roles
-  // if (req.isSeller)
-  //   return next(createError(403, "Only sellers can create a gig!"));
+  // if (req.isAmbassador)
+  //   return next(createError(403, "Only Ambassadors can create a gig!"));
 
 
 

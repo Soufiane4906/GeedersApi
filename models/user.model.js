@@ -7,7 +7,6 @@ const userSchema = new Schema({
     required: true,
     unique: true,
   },
-  //first name and last name
   firstName: {
     type: String,
     required: false,
@@ -31,7 +30,7 @@ const userSchema = new Schema({
   },
   country: {
     type: String,
-    required: true,
+    required: function() { return this.isAmbassador; }, // Obligatoire seulement pour les ambassadeurs
   },
   languages: {
     type: [String], // Array of strings
@@ -41,7 +40,6 @@ const userSchema = new Schema({
     type: String,
     required: false,
   },
-
   phone: {
     type: String,
     required: false,
@@ -50,11 +48,20 @@ const userSchema = new Schema({
     type: String,
     required: false,
   },
-  isSeller: {
+  isAmbassador: {
     type: Boolean,
-    default:false
+    default: false
   },
-  //add more input forr image recto and verso and passeport
+  isAdmin: {
+    type: Boolean,
+    default: false
+  },
+  userType: {
+    type: String,
+    enum: ['guest', 'ambassador', 'admin'],
+    default: 'guest'
+  },
+  // Images for verification
   imgRecto: {
     type: String,
     required: false,
@@ -67,55 +74,29 @@ const userSchema = new Schema({
     type: String,
     required: false,
   },
-  //add field is acoount complete and verified
+  // Account status fields
   isComplete: {
     type: Boolean,
-    default:false
+    default: false
   },
   isVerified: {
     type: Boolean,
-    default:false
+    default: false
   },
-
-  //age
   age: {
     type: String,
     required: false,
   },
-  //bankCardNumber
-  bankCardNumber: {
-    type: String,
-    required: false,
-  },
-  //paypalCardNumber
-  paypalCardNumber: {
-    type: String,
-    required: false,
-  },
-  //applepay
-  applepay: {
-    type: String,
-    required: false,
-  },
-  //googlepay
   accountNumber: {
     type: String,
     required: false,
   },
-  //payment method
   paymentMethod: {
     type: String,
     required: false,
   },
-
-
-  location: {
-    type: String,
-    required: false,
-  },
-
-},{
-  timestamps:true
+}, {
+  timestamps: true
 });
 
 export default mongoose.model("User", userSchema)

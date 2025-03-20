@@ -7,38 +7,31 @@ const GigSchema = new Schema(
       type: String,
       required: true,
     },
-    //totalPrice
-
     title: {
       type: String,
       required: true,
     },
-
     totalStars: {
       type: Number,
       default: 0,
     },
+      city: {
+          type: String,
+          required: true,
+      },
+      country: {
+          type: String,
+          required: true,
+      },
     starNumber: {
       type: Number,
       default: 0,
     },
-    //age
-    //Location
-    //Date of birth
-    age: {
-      type: Date,
-      required: false,
-    },
-    location: {
-      type: String,
-      required: false,
-    },
-//cover
+
     cover: {
       type: String,
       required: false,
     },
-
     price: {
       type: Number,
       required: true,
@@ -47,27 +40,7 @@ const GigSchema = new Schema(
       type: Number,
       required: false,
     },
-    //latitude and longtitude
-    latitude: {
-      type: Number,
-      required: false,
-    },
-    longitude: {
-      type: Number,
-      required: false,
-    },
-
-
-
     images: {
-      type: [String],
-      required: false,
-    },
-    shortDesc: {
-      type: String,
-      required: true,
-    },
-    features: {
       type: [String],
       required: false,
     },
@@ -76,7 +49,7 @@ const GigSchema = new Schema(
       default: 0,
     },
     availabilityTimes: {
-      type: [String], // Changed to an array of time slots
+      type: [String],
       required: true,
     },
     hasCar: {
@@ -99,15 +72,6 @@ const GigSchema = new Schema(
         return this.hasScooter;
       },
     },
-    city: {
-      type: String,
-      required: true,
-    },
-    country: {
-      type: String,
-      required: true,
-    },
-    //string list non required poi
     poi: {
       type: [String],
       required: false,

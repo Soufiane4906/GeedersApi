@@ -3,9 +3,9 @@ import Review from "../models/review.model.js";
 import Gig from "../models/gig.model.js";
 
 export const createReview = async (req, res, next) => {
-  if (req.isSeller){
-    console.log("seller can't create review");
-    return next(createError(403, "Sellers can't create a review!"));
+  if (req.isAmbassador){
+    console.log("Ambassador can't create review");
+    return next(createError(403, "Ambassadors can't create a review!"));
   };
 
   const newReview = new Review({

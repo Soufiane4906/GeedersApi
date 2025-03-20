@@ -7,8 +7,8 @@ import Stripe from "stripe";
 
 export const intent = async (req, res, next) => {
   const stripe = new Stripe(process.env.STRIPE);
-  const { totalPrice, city , country , options, hours, buyerId } = req.body; // Retrieve new fields from the request body
-  console.log("buyerId,",buyerId);
+  const { totalPrice, city , country , options, hours, GuestId } = req.body; // Retrieve new fields from the request body
+  console.log("GuestId,",GuestId);
 
   // Console total price and other data for debugging
 
@@ -27,8 +27,8 @@ export const intent = async (req, res, next) => {
     gigId: gig._id,
     img: gig.cover,
     title: gig.title,
-    buyerId,
-    sellerId: gig.userId,
+    GuestId,
+    AmbassadorId: gig.userId,
     price: gig.price,
     totalprice: totalPrice, // Store total price in the order
     payment_intent: paymentIntent.id,
@@ -55,7 +55,7 @@ export const getOrders = async (req, res, next) => {
 
   try {
     const orders = await Order.find({
-      ...(req.isSeller ? { sellerId: req.userId } : { buyerId: req.userId }),
+      ...(req.isAmbassador ? { AmbassadorId: req.userId } : { GuestId: req.userId }),
       isCompleted: true,
     });
 
@@ -92,15 +92,15 @@ export const getOrder = async (req, res, next) => {
       return res.status(404).send({ message: "Order not found" });
     }
 
-    // Fetch seller info
-    const seller = await User.findById(order.sellerId);
-    if (!seller) {
-      return res.status(404).send({ message: "Seller not found" });
+    // Fetch Ambassador info
+    const Ambassador = await User.findById(order.AmbassadorId);
+    if (!Ambassador) {
+      return res.status(404).send({ message: "Ambassador not found" });
     }
-    console.log(seller);
+    console.log(Ambassador);
 
 
-    res.status(200).send({ order, seller });
+    res.status(200).send({ order, Ambassador });
   } catch (err) {
     next(err);
   }

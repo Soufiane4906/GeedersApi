@@ -19,11 +19,11 @@ const OrderSchema = new Schema(
       type: Number,
       required: true,
     },
-    sellerId: {
+    AmbassadorId: {
       type: String,
       required: true,
     },
-    buyerId: {
+    GuestId: {
       type: String,
       required: true,
     },

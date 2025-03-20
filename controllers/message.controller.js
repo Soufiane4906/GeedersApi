@@ -16,8 +16,8 @@ export const createMessage = async (req, res, next) => {
       { id: req.body.conversationId },
       {
         $set: {
-          readBySeller: req.isSeller,
-          readByBuyer: !req.isSeller,
+          readByAmbassador: req.isAmbassador,
+          readByGuest: !req.isAmbassador,
           lastMessage: req.body.desc,
         },
       },
@@ -47,22 +47,22 @@ export const getMessages = async (req, res, next) => {
       };
     });
 
-    // Fetch conversation details to get buyer and seller details
+    // Fetch conversation details to get Guest and Ambassador details
     const conversation = await Conversation.findOne({ id: req.params.id });
     if (!conversation) {
       return res.status(404).send('Conversation not found');
     }
 
-    // Fetch buyer and seller details
-    const [buyer, seller] = await Promise.all([
-      User.findById(conversation.buyerId),
-      User.findById(conversation.sellerId)
+    // Fetch Guest and Ambassador details
+    const [Guest, Ambassador] = await Promise.all([
+      User.findById(conversation.GuestId),
+      User.findById(conversation.AmbassadorId)
     ]);
 
     res.status(200).json({
       messages: messagesWithUserDetails,
-      buyer: buyer || { img: "https://via.placeholder.com/100", username: "Unknown", email: "", phone: "" },
-      seller: seller || { img: "https://via.placeholder.com/100", username: "Unknown", email: "", phone: "" }
+      Guest: Guest || { img: "https://via.placeholder.com/100", username: "Unknown", email: "", phone: "" },
+      Ambassador: Ambassador || { img: "https://via.placeholder.com/100", username: "Unknown", email: "", phone: "" }
     });
   } catch (err) {
     next(err);
