@@ -1,6 +1,7 @@
 // controllers/user.controller.js
 import User from "../models/user.model.js";
 import createError from "../utils/createError.js";
+import upload from "../utils/upload.js";
 
 export const deleteUser = async (req, res, next) => {
   try {
@@ -26,12 +27,16 @@ export const getUser = async (req, res, next) => {
 
 export const updateProfile = async (req, res, next) => {
   try {
-    const updatedUser = await User.findByIdAndUpdate(
-        req.userId,
-        { ...req.body, isComplete: true },
-        { new: true }
-    );
+    let updateData = { ...req.body, isComplete: true };
+
+    if (req.files?.img) updateData.img = await upload(req.files.img[0]);
+    if (req.files?.imgRecto) updateData.imgRecto = await upload(req.files.imgRecto[0]);
+    if (req.files?.imgVerso) updateData.imgVerso = await upload(req.files.imgVerso[0]);
+    if (req.files?.imgPassport) updateData.imgPassport = await upload(req.files.imgPassport[0]);
+
+    const updatedUser = await User.findByIdAndUpdate(req.userId, updateData, { new: true });
     if (!updatedUser) return next(createError(404, "User not found"));
+
     res.status(200).json(updatedUser);
   } catch (err) {
     next(createError(500, "Error updating profile"));
