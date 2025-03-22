@@ -13,9 +13,12 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from 'path';
 import os from 'os'; // Import the 'os' module to get network interfaces
+dotenv.config();
+console.log("MONGO_URI:", process.env.MONGO_URI); // Ajoute cette ligne pour voir si la variable est chargée
+
 
 const app = express();
-dotenv.config();
+
 
 const mongoUrl = process.env.MONGO_URI;
 const nodeEnv = process.env.NODE_ENV || 'development';
