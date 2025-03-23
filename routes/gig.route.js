@@ -4,7 +4,9 @@ import {
   deleteGig,
   getGig,
   getGigs,
-    getAllGigs
+  getAllGigs,
+  getCountries,
+  getCities
 } from "../controllers/gig.controller.js";
 import { verifyToken } from "../middleware/jwt.js";
 
@@ -21,9 +23,9 @@ router.put('/:id/update-price', async (req, res) => {
   try {
     // Find the gig by ID and update the totalPrice
     const updatedGig = await Gig.findByIdAndUpdate(
-      id,
-      { totalPrice },
-      { new: true } // Return the updated document
+        id,
+        { totalPrice },
+        { new: true } // Return the updated document
     );
 
     if (!updatedGig) {
@@ -36,5 +38,9 @@ router.put('/:id/update-price', async (req, res) => {
   }
 });
 
-router.get("/all" , getAllGigs)
+// Add new routes for fetching countries and cities
+router.get("/countries", getCountries);
+router.get("/cities", getCities);
+router.get("/all", getAllGigs);
+
 export default router;

@@ -1,12 +1,8 @@
 import Gig from "../models/gig.model.js";
 import createError from "../utils/createError.js";
-import User from '../models/user.model.js'; // Adjust the path as needed
+import User from '../models/user.model.js';
 
 export const createGig = async (req, res, next) => {
-  // Uncomment if you want to check user roles
-  // if (req.isAmbassador)
-  //   return next(createError(403, "Only Ambassadors can create a gig!"));
-
   const newGig = new Gig({
     userId: req.userId,
     ...req.body,
@@ -16,7 +12,7 @@ export const createGig = async (req, res, next) => {
     const savedGig = await newGig.save();
     res.status(201).json(savedGig);
   } catch (err) {
-    console.error('Error saving gig:', err); // Log the error
+    console.error('Error saving gig:', err);
     next(err);
   }
 };
@@ -79,20 +75,26 @@ export const getGigs = async (req, res, next) => {
     }
   }
 
-  // Handle date range filtering if needed
+  // Handle date range filtering
   if (q.startDate && q.endDate) {
-    // You can implement date filtering logic here
-    // This would depend on how availability is stored in your Gig model
+    // Implement date filtering based on your availability model
+    // This is a placeholder - adjust based on how you store availability
+    const startDate = new Date(q.startDate);
+    const endDate = new Date(q.endDate);
+
+    // Example implementation - adjust based on your data model
+    filters.availabilityStart = { $lte: endDate };
+    filters.availabilityEnd = { $gte: startDate };
   }
 
   // Handle sorting
   let sortOption = {};
   if (q.sort === 'sales') {
-    sortOption = { sales: -1 }; // Example for best-selling
+    sortOption = { sales: -1 };
   } else if (q.sort === 'popularity') {
-    sortOption = { stars: -1 }; // Example for popularity
+    sortOption = { totalStars: -1 };
   } else if (q.sort === 'createdAt') {
-    sortOption = { createdAt: -1 }; // Newest
+    sortOption = { createdAt: -1 };
   }
 
   try {
@@ -107,6 +109,31 @@ export const getAllGigs = async (req, res, next) => {
   try {
     const gigs = await Gig.find();
     res.status(200).send(gigs);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// New endpoint to get all countries
+export const getCountries = async (req, res, next) => {
+  try {
+    const countries = await Gig.distinct("country");
+    res.status(200).send(countries);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// New endpoint to get cities for a specific country
+export const getCities = async (req, res, next) => {
+  try {
+    const { country } = req.query;
+    if (!country) {
+      return next(createError(400, "Country parameter is required"));
+    }
+
+    const cities = await Gig.distinct("city", { country });
+    res.status(200).send(cities);
   } catch (err) {
     next(err);
   }
