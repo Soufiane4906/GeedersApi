@@ -7,8 +7,6 @@ export const createGig = async (req, res, next) => {
   // if (req.isAmbassador)
   //   return next(createError(403, "Only Ambassadors can create a gig!"));
 
-
-
   const newGig = new Gig({
     userId: req.userId,
     ...req.body,
@@ -35,6 +33,7 @@ export const deleteGig = async (req, res, next) => {
     next(err);
   }
 };
+
 export const getGig = async (req, res, next) => {
   try {
     const gig = await Gig.findById(req.params.id);
@@ -56,24 +55,34 @@ export const getGigs = async (req, res, next) => {
 
   if (q.country) {
     filters.country = q.country;
-
   }
 
   if (q.city) {
     filters.city = q.city;
-
   }
 
+  // Handle POI filtering
+  if (q.poi) {
+    const poiList = q.poi.split(',').map(poi => poi.trim());
+    filters.poi = { $in: poiList };
+  }
+
+  // Handle language filtering
   if (q.languages) {
     const languages = q.languages.split(',').map(lang => lang.trim());
     try {
       const users = await User.find({ languages: { $in: languages } });
-      const userIds = users.map(user => user._id);
+      const userIds = users.map(user => user._id.toString());
       filters.userId = { $in: userIds };
     } catch (err) {
       return next(err);
     }
+  }
 
+  // Handle date range filtering if needed
+  if (q.startDate && q.endDate) {
+    // You can implement date filtering logic here
+    // This would depend on how availability is stored in your Gig model
   }
 
   // Handle sorting
@@ -94,13 +103,11 @@ export const getGigs = async (req, res, next) => {
   }
 };
 
-
 export const getAllGigs = async (req, res, next) => {
-    try {
-        const gigs = await Gig.find();
-        res.status(200).send(gigs);
-    } catch (err) {
-        next(err);
-    }
-
-}
+  try {
+    const gigs = await Gig.find();
+    res.status(200).send(gigs);
+  } catch (err) {
+    next(err);
+  }
+};
