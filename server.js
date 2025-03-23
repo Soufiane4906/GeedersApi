@@ -60,6 +60,10 @@ app.use("/api/conversations", conversationRoute);
 app.use("/api/messages", messageRoute);
 app.use("/api/reviews", reviewRoute);
 app.use("/api/countries", countryRoutes);
+app.get("/helo", (req, res) => {
+  res.send("Hello, your server is running!");
+});
+
 
 app.use((err, req, res, next) => {
   const errorStatus = err.status || 500;
