@@ -2,6 +2,7 @@
 import User from "../models/user.model.js";
 import createError from "../utils/createError.js";
 import upload from "../utils/upload.js";
+import bcrypt from "bcrypt";
 
 export const deleteUser = async (req, res, next) => {
   try {
@@ -51,5 +52,28 @@ export const getVerifiedUsers = async (req, res, next) => {
     res.status(200).json(users);
   } catch (err) {
     next(createError(500, "Error fetching verified users"));
+  }
+};
+
+
+export const updatePassword = async (req, res, next) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    const user = await User.findById(req.userId);
+
+    if (!user) return next(createError(404, "User not found"));
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) return next(createError(400, "Incorrect current password"));
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (err) {
+    next(createError(500, "Error updating password"));
   }
 };

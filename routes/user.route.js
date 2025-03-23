@@ -1,10 +1,11 @@
 import express from "express";
-import { deleteUser, getUser , updateProfile , getVerifiedUsers } from "../controllers/user.controller.js";
+import {deleteUser, getUser, updateProfile, getVerifiedUsers, updatePassword} from "../controllers/user.controller.js";
 import { verifyToken } from "../middleware/jwt.js";
 import multer from "multer";
 const upload = multer({ storage: multer.memoryStorage() });
 
 const router = express.Router();
+router.put("/:id/update-password", verifyToken, updatePassword);
 
 router.delete("/:id", verifyToken, deleteUser);
 router.get("/:id", getUser);
