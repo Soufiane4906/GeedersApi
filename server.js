@@ -37,8 +37,8 @@ const connect = async () => {
 };
 
 //const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['https://www.blablatrip.com,https://blablatrip.com,http://105.75.240.99, https://105.75.240.99:5174'];
-const allowedOrigins ='https://www.blablatrip.com'
-    app.use(cors({
+const allowedOrigins = ['https://www.blablatrip.com', 'http://localhost:5174'];
+app.use(cors({
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
