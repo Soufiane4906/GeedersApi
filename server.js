@@ -15,6 +15,8 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from 'path';
 import os from 'os';
+import cityRoutes from "./routes/city.route.js";
+
 import adminRoute from "./routes/admin.route.js";
 dotenv.config();
 console.log("MONGO_URI:", process.env.MONGO_URI);
@@ -60,6 +62,7 @@ app.use("/api/conversations", conversationRoute);
 app.use("/api/messages", messageRoute);
 app.use("/api/reviews", reviewRoute);
 app.use("/api/countries", countryRoutes);
+app.use("/api/cities", cityRoutes);
 app.use("/api/admin", adminRoute);
 app.use("/api/adminUsers", adminUsersRoutes);
 app.use("/api/adminOrders", adminOrdersRoutes); // Add the new admin orders route
