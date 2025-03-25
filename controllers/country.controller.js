@@ -23,6 +23,27 @@ export const getCountryById = async (req, res, next) => {
   }
 };
 
+export const getCitiesByCountryId = async (req, res, next) => {
+  try {
+    const { countryId } = req.query;
+
+    if (!countryId) {
+      return res.status(400).json({ message: "Country ID is required" });
+    }
+
+    const country = await Country.findById(countryId);
+
+    if (!country) {
+      return res.status(404).json({ message: "Country not found" });
+    }
+
+    // Return the cities array from the country document
+    res.status(200).json(country.cities || []);
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const createCountry = async (req, res, next) => {
   try {
     const newCountry = new Country(req.body);
@@ -87,6 +108,32 @@ export const getUsersByCountry = async (req, res, next) => {
     }).select("-password");
 
     res.status(200).json(users);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const addCity = async (req, res, next) => {
+  try {
+    const { countryId } = req.params;
+    const { name, description, image } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ message: "City name is required" });
+    }
+
+    const country = await Country.findById(countryId);
+    if (!country) {
+      return res.status(404).json({ message: "Country not found" });
+    }
+
+    // Add the new city to the cities array
+    country.cities.push({ name, description, image });
+    await country.save();
+
+    // Return the newly added city
+    const newCity = country.cities[country.cities.length - 1];
+    res.status(201).json(newCity);
   } catch (err) {
     next(err);
   }

@@ -5,42 +5,37 @@ import {
   getGig,
   getGigs,
   getAllGigs,
-  getCountries,
-  getCities
+  updateGig,
+  // Routes admin
+  getAdminGigs,
+  getAdminGigStats,
+  adminDeleteGig,
+  adminUpdateGigStatus,
+  adminUpdateGigFeatured,
+  adminBulkDeleteGigs,
+  adminBulkUpdateGigStatus,
+  adminBulkUpdateGigFeatured
 } from "../controllers/gig.controller.js";
-import { verifyToken } from "../middleware/jwt.js";
+import { verifyToken, verifyAdmin } from "../middleware/jwt.js";
 
 const router = express.Router();
 
+// Routes utilisateur standard
 router.post("/", verifyToken, createGig);
 router.delete("/:id", verifyToken, deleteGig);
 router.get("/single/:id", getGig);
 router.get("/", getGigs);
-router.put('/:id/update-price', async (req, res) => {
-  const { id } = req.params;
-  const { totalPrice } = req.body;
-
-  try {
-    // Find the gig by ID and update the totalPrice
-    const updatedGig = await Gig.findByIdAndUpdate(
-        id,
-        { totalPrice },
-        { new: true } // Return the updated document
-    );
-
-    if (!updatedGig) {
-      return res.status(404).json({ message: 'Gig not found' });
-    }
-
-    res.json(updatedGig);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// Add new routes for fetching countries and cities
-router.get("/countries", getCountries);
-router.get("/cities", getCities);
 router.get("/all", getAllGigs);
+router.put("/:id", verifyToken, updateGig);
+
+// Routes admin - ajout du préfixe /admin pour correspondre aux appels frontend
+router.get("/admin/gigs", verifyToken, verifyAdmin, getAdminGigs);
+router.get("/admin/stats", verifyToken, verifyAdmin, getAdminGigStats);
+router.delete("/admin/:id", verifyToken, verifyAdmin, adminDeleteGig);
+router.patch("/admin/:id/status", verifyToken, verifyAdmin, adminUpdateGigStatus);
+router.patch("/admin/:id/featured", verifyToken, verifyAdmin, adminUpdateGigFeatured);
+router.post("/admin/bulk-delete", verifyToken, verifyAdmin, adminBulkDeleteGigs);
+router.post("/admin/bulk-status", verifyToken, verifyAdmin, adminBulkUpdateGigStatus);
+router.post("/admin/bulk-featured", verifyToken, verifyAdmin, adminBulkUpdateGigFeatured);
 
 export default router;
