@@ -16,6 +16,7 @@ import cors from "cors";
 import path from 'path';
 import os from 'os';
 import cityRoutes from "./routes/city.route.js";
+import poiRoutes from "./routes/poi.route.js";
 
 import adminRoute from "./routes/admin.route.js";
 dotenv.config();
@@ -64,6 +65,7 @@ app.use("/api/reviews", reviewRoute);
 app.use("/api/countries", countryRoutes);
 app.use("/api/cities", cityRoutes);
 app.use("/api/admin", adminRoute);
+app.use("/api/pois", poiRoutes);
 app.use("/api/adminUsers", adminUsersRoutes);
 app.use("/api/adminOrders", adminOrdersRoutes); // Add the new admin orders route
 app.get("/helo", (req, res) => {
