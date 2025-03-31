@@ -19,7 +19,7 @@ import poiRoutes from "./routes/poi.route.js";
 
 import adminRoute from "./routes/admin.route.js";
 import gigRoute from "./routes/gig.route.js";
-
+import adminGigsRoute from "./routes/adminGigs.route.js";
 dotenv.config();
 console.log("MONGO_URI:", process.env.MONGO_URI);
 
@@ -59,6 +59,7 @@ app.use(cookieParser());
 app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
 app.use("/api/gigs", gigRoute);
+app.use("/api/admin/gigs", adminGigsRoute);
 app.use("/api/orders", orderRoute);
 app.use("/api/conversations", conversationRoute);
 app.use("/api/messages", messageRoute);
