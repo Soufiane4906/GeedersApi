@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
-const { Schema } = mongoose;
 
-const GigSchema = new Schema(
+const GigSchema = new mongoose.Schema(
     {
         userId: {
             type: String,
@@ -23,21 +22,25 @@ const GigSchema = new Schema(
             type: Number,
             default: 0,
         },
+        cat: {
+            type: String,
+            required: false,
+        },
         price: {
             type: Number,
             required: true,
         },
         cover: {
             type: String,
-            required: true,
+            required: false,
         },
         images: {
             type: [String],
-            default: [],
+            required: false,
         },
         shortTitle: {
             type: String,
-            required: true,
+            required: false,
         },
         shortDesc: {
             type: String,
@@ -45,19 +48,34 @@ const GigSchema = new Schema(
         },
         deliveryTime: {
             type: Number,
-            required: true,
+            required: false,
         },
         revisionNumber: {
             type: Number,
-            required: true,
+            required: false,
         },
         features: {
             type: [String],
-            default: [],
+            required: false,
         },
         sales: {
             type: Number,
             default: 0,
+        },
+        // Updated languages field with proper reference
+        languages: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Language'  // This should match the name used when defining the Language model
+            }
+        ],
+        country: {
+            type: String,
+            required: false,
+        },
+        city: {
+            type: String,
+            required: false,
         },
         active: {
             type: Boolean,
@@ -67,42 +85,21 @@ const GigSchema = new Schema(
             type: Boolean,
             default: false,
         },
-        country: {
-            type: String,
-            required: true,
+        poi: {
+            type: [String],
+            required: false,
         },
-        city: {
-            type: String,
-            required: true,
-        },
-        // New fields based on your form
         hasCar: {
             type: Boolean,
             default: false,
-        },
-        carPrice: {
-            type: Number,
-            default: 0,
         },
         hasScooter: {
             type: Boolean,
             default: false,
         },
-        scooterPrice: {
-            type: Number,
-            default: 0,
-        },
         availabilityTimes: {
-            type: [Date],
-            default: [],
-        },
-        languages: {
-            type: [String],
-            default: [],
-        },
-        poi: {
-            type: [String],
-            default: [], // Points of interest
+            type: Object,
+            required: false,
         }
     },
     {

@@ -65,25 +65,38 @@ export const getOrders = async (req, res, next) => {
     next(err);
   }
 };
+
+
 export const confirm = async (req, res, next) => {
   try {
-    const orders = await Order.findOneAndUpdate(
-      {
-        payment_intent: req.body.payment_intent,
-      },
-      {
-        $set: {
-          isCompleted: true,
-        },
-      }
-    );
+    const { payment_intent } = req.body;
 
-    res.status(200).send("Order has been confirmed.");
+    if (!payment_intent) {
+      return res.status(400).send("Payment intent is required");
+    }
+
+    // Find the order first without updating
+    const existingOrder = await Order.findOne({ payment_intent });
+
+    if (!existingOrder) {
+      return res.status(404).send("Order not found");
+    }
+
+    // If already completed, don't update again
+    if (existingOrder.isCompleted) {
+      return res.status(200).send("Order already confirmed");
+    }
+
+    // Update the order to completed status
+    existingOrder.isCompleted = true;
+    await existingOrder.save();
+
+    res.status(200).send("Order has been confirmed");
   } catch (err) {
+    console.error("Order confirmation error:", err);
     next(err);
   }
 };
-//get order
 
 export const getOrder = async (req, res, next) => {
   try {

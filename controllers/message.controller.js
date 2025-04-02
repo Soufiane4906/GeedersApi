@@ -3,6 +3,24 @@ import Message from "../models/message.model.js";
 import Conversation from "../models/conversation.model.js";
 import User from "../models/user.model.js";
 
+
+// En haut du fichier, après les imports existants
+import { upload } from "../middleware/upload.js"; // Importez le middleware d'upload
+
+// Modifiez la fonction uploadMessageFile pour utiliser multer
+export const uploadMessageFile = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return next(createError(400, "No file uploaded"));
+    }
+
+    const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+    res.status(200).json({ fileUrl });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const createMessage = async (req, res, next) => {
   try {
     const { conversationId, desc, type = 'text', fileUrl, duration, location } = req.body;
@@ -16,37 +34,31 @@ export const createMessage = async (req, res, next) => {
     };
 
     // Add optional fields based on message type
-    if (type === 'audio' && duration) {
-      messageData.duration = duration;
+    if (type === 'image' || type === 'file' || type === 'audio') {
+      messageData.fileUrl = fileUrl;
     }
 
-    if (['audio', 'image', 'file'].includes(type) && fileUrl) {
-      messageData.fileUrl = fileUrl;
+    if (type === 'audio' && duration) {
+      messageData.duration = duration;
     }
 
     if (type === 'location' && location) {
       messageData.location = location;
     }
 
+    // Create the message
     const newMessage = new Message(messageData);
-    const savedMessage = await newMessage.save();
+    await newMessage.save();
 
-    // Update conversation with last message
-    await Conversation.findOneAndUpdate(
-        { id: conversationId },
-        {
-          $set: {
-            readByAmbassador: req.isAmbassador,
-            readByGuest: !req.isAmbassador,
-            lastMessage: desc,
-            lastMessageType: type,
-            lastMessageTime: new Date()
-          },
-        },
-        { new: true }
-    );
+    // Update the conversation's last message
+    await Conversation.findByIdAndUpdate(conversationId, {
+      $set: {
+        lastMessage: desc.substring(0, 50) + (desc.length > 50 ? '...' : ''),
+        updatedAt: new Date()
+      }
+    });
 
-    res.status(201).send(savedMessage);
+    res.status(201).json(newMessage);
   } catch (err) {
     next(err);
   }
@@ -54,60 +66,41 @@ export const createMessage = async (req, res, next) => {
 
 export const getMessages = async (req, res, next) => {
   try {
-    const messages = await Message.find({ conversationId: req.params.id });
+    const messages = await Message.find({ conversationId: req.params.id })
+        .sort({ createdAt: 1 });
 
-    // Get unique user IDs from messages
-    const userIds = [...new Set(messages.map(message => message.userId))];
-    const users = await User.find({ _id: { $in: userIds } });
+    res.status(200).json(messages);
+  } catch (err) {
+    next(err);
+  }
+};
 
-    // Map user data to each message
-    const messagesWithUserDetails = messages.map(message => {
-      const user = users.find(user => user._id.toString() === message.userId.toString());
-      return {
-        ...message.toObject(),
-        user: user || { img: "https://via.placeholder.com/40", username: "Unknown" }
-      };
-    });
+export const markAsRead = async (req, res, next) => {
+  try {
+    const { id } = req.params;
 
-    // Fetch conversation details to get Guest and Ambassador details
-    const conversation = await Conversation.findOne({ id: req.params.id });
+    // Verify the user is part of the conversation
+    const conversation = await Conversation.findById(id);
     if (!conversation) {
-      return res.status(404).send('Conversation not found');
+      return next(createError(404, "Conversation not found"));
     }
 
-    // Fetch Guest and Ambassador details
-    const [Guest, Ambassador] = await Promise.all([
-      User.findById(conversation.GuestId),
-      User.findById(conversation.AmbassadorId)
-    ]);
-
-    // Mark messages as read if current user is not the sender
-    if (messages.length > 0) {
-      await Message.updateMany(
-          {
-            conversationId: req.params.id,
-            userId: { $ne: req.userId },
-            'readBy.userId': { $ne: req.userId }
-          },
-          {
-            $set: { status: 'read' },
-            $push: { readBy: { userId: req.userId, readAt: new Date() } }
-          }
-      );
-
-      // Update conversation read status
-      const readField = req.isAmbassador ? 'readByAmbassador' : 'readByGuest';
-      await Conversation.updateOne(
-          { id: req.params.id },
-          { $set: { [readField]: true } }
-      );
+    if (conversation.sellerId.toString() !== req.userId &&
+        conversation.buyerId.toString() !== req.userId) {
+      return next(createError(403, "You are not authorized"));
     }
 
-    res.status(200).json({
-      messages: messagesWithUserDetails,
-      Guest: Guest || { img: "https://via.placeholder.com/40", username: "Unknown", email: "", phone: "" },
-      Ambassador: Ambassador || { img: "https://via.placeholder.com/40", username: "Unknown", email: "", phone: "" }
-    });
+    // Mark all messages as read where userId is not the current user
+    await Message.updateMany(
+        {
+          conversationId: id,
+          userId: { $ne: req.userId },
+          read: false
+        },
+        { $set: { read: true } }
+    );
+
+    res.status(200).send("Messages marked as read");
   } catch (err) {
     next(err);
   }
@@ -115,109 +108,18 @@ export const getMessages = async (req, res, next) => {
 
 export const translateMessage = async (req, res, next) => {
   try {
-    const { messageId, targetLanguage } = req.body;
+    const { text, targetLanguage } = req.body;
 
-    if (!messageId || !targetLanguage) {
-      return next(createError(400, "Message ID and target language are required"));
-    }
+    // Intégration avec un service de traduction
+    // Ceci est un exemple simplifié - vous devriez utiliser un vrai service de traduction
+    const translatedText = `Traduction de "${text}" en ${targetLanguage}`;
 
-    const message = await Message.findById(messageId);
-    if (!message) {
-      return next(createError(404, "Message not found"));
-    }
-
-    // Check if translation already exists
-    const existingTranslation = message.translations.find(
-        t => t.language === targetLanguage
-    );
-
-    if (existingTranslation) {
-      return res.status(200).json({
-        messageId,
-        translatedText: existingTranslation.text,
-        language: targetLanguage
-      });
-    }
-
-    // In a real app, you would call a translation API here
-    // For demo purposes, we'll simulate a translation with a prefix
-    const translatedText = `[${targetLanguage}] ${message.desc}`;
-
-    // Save the translation to the message
-    message.translations.push({
-      language: targetLanguage,
-      text: translatedText
-    });
-
-    await message.save();
-
-    res.status(200).json({
-      messageId,
-      translatedText,
-      language: targetLanguage
-    });
+    res.status(200).json({ translatedText });
   } catch (err) {
     next(err);
   }
 };
 
-export const markMessageAsRead = async (req, res, next) => {
-  try {
-    const { messageId } = req.params;
-
-    const message = await Message.findById(messageId);
-    if (!message) {
-      return next(createError(404, "Message not found"));
-    }
-
-    // Check if user has already read the message
-    const alreadyRead = message.readBy.some(
-        read => read.userId === req.userId
-    );
-
-    if (!alreadyRead) {
-      // Add user to readBy array
-      message.readBy.push({
-        userId: req.userId,
-        readAt: new Date()
-      });
-
-      // Update status if all conversation participants have read it
-      const conversation = await Conversation.findOne({ id: message.conversationId });
-      const participantIds = [conversation.GuestId, conversation.AmbassadorId].map(id => id.toString());
-
-      if (message.readBy.length >= participantIds.length) {
-        message.status = 'read';
-      } else {
-        message.status = 'delivered';
-      }
-
-      await message.save();
-    }
-
-    res.status(200).json({ success: true });
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const uploadMessageFile = async (req, res, next) => {
-  try {
-    // Note: This would require file upload middleware like multer
-    // For this example, we're assuming the file is already uploaded and the URL is provided
-    if (!req.file && !req.body.fileUrl) {
-      return next(createError(400, "No file uploaded"));
-    }
-
-    const fileUrl = req.file ?
-        `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}` :
-        req.body.fileUrl;
-
-    res.status(200).json({ fileUrl });
-  } catch (err) {
-    next(err);
-  }
-};
 
 export const shareLocation = async (req, res, next) => {
   try {
@@ -261,3 +163,6 @@ export const shareLocation = async (req, res, next) => {
     next(err);
   }
 };
+
+
+

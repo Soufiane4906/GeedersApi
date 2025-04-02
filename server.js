@@ -74,6 +74,8 @@ app.use("/api/languages", languageRoutes);
 app.use("/api/adminUsers", adminUsersRoutes);
 app.use("/api/story", travelStoryRoute);
 app.use("/api/adminOrders", adminOrdersRoutes); // Add the new admin orders route
+// Ajouter ceci avec les autres middlewares dans server.js
+app.use('/uploads', express.static('uploads'));
 app.get("/helo", (req, res) => {
   res.send("Hello, your server is running!");
 });

@@ -34,8 +34,10 @@ export const deleteGig = async (req, res, next) => {
 
 export const getGig = async (req, res, next) => {
   try {
-    const gig = await Gig.findById(req.params.id);
+    // Use populate to automatically fetch language details
+    const gig = await Gig.findById(req.params.id).populate('languages');
     if (!gig) return next(createError(404, "Gig not found!"));
+
     res.status(200).send(gig);
   } catch (err) {
     next(err);
@@ -47,8 +49,8 @@ export const getGigs = async (req, res, next) => {
     // Extract query parameters
     const { country, city, userId, sort, poi, languages, hasCar, hasScooter, startDate, endDate } = req.query;
 
-    // Initial query filters - only active gigs
-    const filters = { active: null };
+    // Initial query filters
+    const filters = {};
 
     // Log received query parameters for debugging
     console.log("Search query parameters:", {
@@ -72,13 +74,11 @@ export const getGigs = async (req, res, next) => {
     // Handle arrays that might come as comma-separated strings
     if (poi) {
       const poiArray = poi.split(',');
-      // Use $in to match gigs containing ANY of the specified POIs
       filters.poi = { $in: poiArray };
     }
 
     if (languages) {
       const langArray = languages.split(',');
-      // Use $in to match gigs that support ANY of the specified languages
       filters.languages = { $in: langArray };
     }
 
@@ -90,8 +90,6 @@ export const getGigs = async (req, res, next) => {
     if (startDate && endDate) {
       // This is a simplified version - in reality, you'd need more complex logic
       // to check if the gig is available within the date range
-      // This depends on how your availabilityTimes field is structured
-      // For now, we'll skip this part as it needs more specific implementation
     }
 
     // Log the constructed filter for debugging
@@ -113,7 +111,8 @@ export const getGigs = async (req, res, next) => {
         sortOption = { createdAt: -1 };
     }
 
-    const gigs = await Gig.find(filters).sort(sortOption);
+    // Use populate to automatically fetch language details
+    const gigs = await Gig.find(filters).populate('languages').sort(sortOption);
 
     // Log the number of results found
     console.log(`Found ${gigs.length} gigs matching the criteria`);
@@ -137,7 +136,7 @@ export const updateGig = async (req, res, next) => {
         req.params.id,
         { $set: req.body },
         { new: true }
-    );
+    ).populate('languages');
 
     res.status(200).send(updatedGig);
   } catch (err) {
@@ -148,8 +147,39 @@ export const updateGig = async (req, res, next) => {
 // Admin routes
 export const getAdminGigs = async (req, res, next) => {
   try {
-    const gigs = await Gig.find();
-    res.status(200).send(gigs);
+    const { page = 1, sort = 'createdAt', direction = 'desc', status, country, search } = req.query;
+    const limit = 10; // Items per page
+    const skip = (page - 1) * limit;
+
+    // Build filter object
+    const filter = {};
+    if (status === 'active') filter.active = true;
+    if (status === 'inactive') filter.active = false;
+    if (status === 'featured') filter.featured = true;
+    if (country) filter.country = country;
+    if (search) filter.title = { $regex: search, $options: 'i' };
+
+    // Count total documents for pagination
+    const totalDocs = await Gig.countDocuments(filter);
+    const totalPages = Math.ceil(totalDocs / limit);
+
+    // Sort options
+    const sortOptions = {};
+    sortOptions[sort] = direction === 'asc' ? 1 : -1;
+
+    // Fetch gigs with pagination and sorting, and populate languages
+    const gigs = await Gig.find(filter)
+        .populate('languages')
+        .sort(sortOptions)
+        .skip(skip)
+        .limit(limit);
+
+    res.status(200).send({
+      gigs,
+      totalPages,
+      currentPage: page,
+      totalDocs
+    });
   } catch (err) {
     next(err);
   }
@@ -184,7 +214,8 @@ export const adminUpdateGig = async (req, res, next) => {
         req.params.id,
         { $set: req.body },
         { new: true }
-    );
+    ).populate('languages');
+
     res.status(200).send(updatedGig);
   } catch (err) {
     next(err);
@@ -197,7 +228,8 @@ export const adminUpdateGigStatus = async (req, res, next) => {
         req.params.id,
         { $set: { active: req.body.active } },
         { new: true }
-    );
+    ).populate('languages');
+
     res.status(200).send(updatedGig);
   } catch (err) {
     next(err);
@@ -210,7 +242,8 @@ export const adminUpdateGigFeatured = async (req, res, next) => {
         req.params.id,
         { $set: { featured: req.body.featured } },
         { new: true }
-    );
+    ).populate('languages');
+
     res.status(200).send(updatedGig);
   } catch (err) {
     next(err);
@@ -255,7 +288,8 @@ export const adminBulkUpdateGigFeatured = async (req, res, next) => {
 
 export const getAllGigs = async (req, res, next) => {
   try {
-    const gigs = await Gig.find();
+    // Use populate to automatically fetch language details
+    const gigs = await Gig.find().populate('languages');
     res.status(200).send(gigs);
   } catch (err) {
     next(err);
