@@ -1,8 +1,8 @@
 import express from "express";
-import { verifyToken } from "../middleware/jwt.js";
-import User from "../models/user.model.js";
-import Gig from "../models/gig.model.js";
-import Order from "../models/order.model.js";
+import { verifyToken } from "../../middleware/jwt.js";
+import User from "../../models/user.model.js";
+import Gig from "../../models/gig.model.js";
+import Order from "../../models/order.model.js";
 
 const router = express.Router();
 

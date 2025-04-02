@@ -23,10 +23,6 @@ const GigSchema = new Schema(
             type: Number,
             default: 0,
         },
-        cat: {
-            type: String,
-            required: true,
-        },
         price: {
             type: Number,
             required: true,
@@ -78,6 +74,35 @@ const GigSchema = new Schema(
         city: {
             type: String,
             required: true,
+        },
+        // New fields based on your form
+        hasCar: {
+            type: Boolean,
+            default: false,
+        },
+        carPrice: {
+            type: Number,
+            default: 0,
+        },
+        hasScooter: {
+            type: Boolean,
+            default: false,
+        },
+        scooterPrice: {
+            type: Number,
+            default: 0,
+        },
+        availabilityTimes: {
+            type: [Date],
+            default: [],
+        },
+        languages: {
+            type: [String],
+            default: [],
+        },
+        poi: {
+            type: [String],
+            default: [], // Points of interest
         }
     },
     {

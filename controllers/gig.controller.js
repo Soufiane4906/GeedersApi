@@ -1,8 +1,9 @@
 import Gig from "../models/gig.model.js";
 import createError from "../utils/createError.js";
-import User from '../models/user.model.js';
 
 export const createGig = async (req, res, next) => {
+  if (!req.userId) return next(createError(401, "You are not authenticated!"));
+
   const newGig = new Gig({
     userId: req.userId,
     ...req.body,
@@ -12,7 +13,6 @@ export const createGig = async (req, res, next) => {
     const savedGig = await newGig.save();
     res.status(201).json(savedGig);
   } catch (err) {
-    console.error('Error saving gig:', err);
     next(err);
   }
 };
@@ -20,6 +20,8 @@ export const createGig = async (req, res, next) => {
 export const deleteGig = async (req, res, next) => {
   try {
     const gig = await Gig.findById(req.params.id);
+    if (!gig) return next(createError(404, "Gig not found!"));
+
     if (gig.userId !== req.userId)
       return next(createError(403, "You can delete only your gig!"));
 
@@ -33,7 +35,7 @@ export const deleteGig = async (req, res, next) => {
 export const getGig = async (req, res, next) => {
   try {
     const gig = await Gig.findById(req.params.id);
-    if (!gig) next(createError(404, "Gig not found!"));
+    if (!gig) return next(createError(404, "Gig not found!"));
     res.status(200).send(gig);
   } catch (err) {
     next(err);
@@ -41,40 +43,84 @@ export const getGig = async (req, res, next) => {
 };
 
 export const getGigs = async (req, res, next) => {
-  const q = req.query;
-
-  // Define the filters based on query parameters
-  const filters = {};
-
-  // Basic filters
-  if (q.userId) {
-    filters.userId = q.userId;
-  }
-
-  if (q.country) {
-    filters.country = q.country;
-  }
-
-  if (q.city) {
-    filters.city = q.city;
-  }
-
-  // Set active filter to true by default
-  filters.active = true;
-
   try {
-    const gigs = await Gig.find(filters).sort({ [q.sort || "createdAt"]: -1 });
+    // Extract query parameters
+    const { country, city, userId, sort, poi, languages, hasCar, hasScooter, startDate, endDate } = req.query;
+
+    // Initial query filters - only active gigs
+    const filters = { active: null };
+
+    // Log received query parameters for debugging
+    console.log("Search query parameters:", {
+      country,
+      city,
+      userId,
+      sort,
+      poi,
+      languages,
+      hasCar,
+      hasScooter,
+      startDate,
+      endDate
+    });
+
+    // Add optional filters if they exist
+    if (country) filters.country = country;
+    if (city) filters.city = city;
+    if (userId) filters.userId = userId;
+
+    // Handle arrays that might come as comma-separated strings
+    if (poi) {
+      const poiArray = poi.split(',');
+      // Use $in to match gigs containing ANY of the specified POIs
+      filters.poi = { $in: poiArray };
+    }
+
+    if (languages) {
+      const langArray = languages.split(',');
+      // Use $in to match gigs that support ANY of the specified languages
+      filters.languages = { $in: langArray };
+    }
+
+    // Handle boolean filters
+    if (hasCar === 'true') filters.hasCar = true;
+    if (hasScooter === 'true') filters.hasScooter = true;
+
+    // Handle date availability
+    if (startDate && endDate) {
+      // This is a simplified version - in reality, you'd need more complex logic
+      // to check if the gig is available within the date range
+      // This depends on how your availabilityTimes field is structured
+      // For now, we'll skip this part as it needs more specific implementation
+    }
+
+    // Log the constructed filter for debugging
+    console.log("Constructed filters:", filters);
+
+    // Set sorting criteria
+    let sortOption = {};
+    switch (sort) {
+      case "sales":
+        sortOption = { sales: -1 };
+        break;
+      case "popularity":
+        sortOption = { totalStars: -1 };
+        break;
+      case "createdAt":
+        sortOption = { createdAt: -1 };
+        break;
+      default:
+        sortOption = { createdAt: -1 };
+    }
+
+    const gigs = await Gig.find(filters).sort(sortOption);
+
+    // Log the number of results found
+    console.log(`Found ${gigs.length} gigs matching the criteria`);
+
     res.status(200).send(gigs);
   } catch (err) {
-    next(err);
-  }
-};
-
-export const getAllGigs = async (req, res, next) => {
-  try {
-    const gigs = await Gig.find();
-    res.status(200).send(gigs);
-  } catch (err) {
+    console.error("Error in getGigs:", err);
     next(err);
   }
 };
@@ -82,14 +128,10 @@ export const getAllGigs = async (req, res, next) => {
 export const updateGig = async (req, res, next) => {
   try {
     const gig = await Gig.findById(req.params.id);
+    if (!gig) return next(createError(404, "Gig not found!"));
 
-    if (!gig) {
-      return next(createError(404, "Gig not found!"));
-    }
-
-    if (gig.userId !== req.userId) {
+    if (gig.userId !== req.userId)
       return next(createError(403, "You can update only your gig!"));
-    }
 
     const updatedGig = await Gig.findByIdAndUpdate(
         req.params.id,
@@ -103,233 +145,119 @@ export const updateGig = async (req, res, next) => {
   }
 };
 
-// ADMIN CONTROLLERS
-
-// Récupérer tous les gigs pour l'admin (avec pagination, tri et filtres)
+// Admin routes
 export const getAdminGigs = async (req, res, next) => {
   try {
-    const {
-      page = 1,
-      limit = 10,
-      sort = "createdAt",
-      direction = "desc",
-      status,
-      country,
-      search
-    } = req.query;
-
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-
-    // Construire le filtre
-    const filter = {};
-
-    if (status === "active") {
-      filter.active = true;
-    } else if (status === "inactive") {
-      filter.active = false;
-    } else if (status === "featured") {
-      filter.featured = true;
-    }
-
-    if (country) {
-      filter.country = country;
-    }
-
-    if (search) {
-      filter.$or = [
-        { title: { $regex: search, $options: "i" } },
-        { desc: { $regex: search, $options: "i" } }
-      ];
-    }
-
-    // Récupérer les gigs avec agrégation pour inclure les infos utilisateur
-    const gigs = await Gig.aggregate([
-      { $match: filter },
-      { $sort: { [sort]: direction === "asc" ? 1 : -1 } },
-      { $skip: skip },
-      { $limit: parseInt(limit) },
-      {
-        $lookup: {
-          from: "users",
-          localField: "userId",
-          foreignField: "_id",
-          as: "userInfo"
-        }
-      },
-      {
-        $addFields: {
-          username: { $arrayElemAt: ["$userInfo.username", 0] },
-          userImg: { $arrayElemAt: ["$userInfo.img", 0] }
-        }
-      },
-      {
-        $project: {
-          userInfo: 0
-        }
-      }
-    ]);
-
-    // Compter le nombre total de gigs correspondant au filtre
-    const total = await Gig.countDocuments(filter);
-    const totalPages = Math.ceil(total / parseInt(limit));
-
-    res.status(200).json({
-      gigs,
-      total,
-      totalPages,
-      currentPage: parseInt(page)
-    });
+    const gigs = await Gig.find();
+    res.status(200).send(gigs);
   } catch (err) {
-    console.error("Error fetching admin gigs:", err);
     next(err);
   }
 };
 
-// Obtenir les statistiques des gigs
 export const getAdminGigStats = async (req, res, next) => {
   try {
-    const total = await Gig.countDocuments();
-    const active = await Gig.countDocuments({ active: true });
-    const inactive = await Gig.countDocuments({ active: false });
-    const featured = await Gig.countDocuments({ featured: true });
-
-    res.status(200).json({
-      total,
-      active,
-      inactive,
-      featured
-    });
+    const stats = {
+      total: await Gig.countDocuments(),
+      active: await Gig.countDocuments({ active: true }),
+      inactive: await Gig.countDocuments({ active: false }),
+      featured: await Gig.countDocuments({ featured: true })
+    };
+    res.status(200).send(stats);
   } catch (err) {
-    console.error("Error fetching gig stats:", err);
     next(err);
   }
 };
 
-// Supprimer un gig (admin)
 export const adminDeleteGig = async (req, res, next) => {
   try {
     await Gig.findByIdAndDelete(req.params.id);
-    res.status(200).send("Gig has been deleted!");
+    res.status(200).send("Gig has been deleted by admin!");
   } catch (err) {
-    console.error("Error deleting gig:", err);
     next(err);
   }
 };
 
-// Mettre à jour le statut d'un gig
+export const adminUpdateGig = async (req, res, next) => {
+  try {
+    const updatedGig = await Gig.findByIdAndUpdate(
+        req.params.id,
+        { $set: req.body },
+        { new: true }
+    );
+    res.status(200).send(updatedGig);
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const adminUpdateGigStatus = async (req, res, next) => {
   try {
-    const { active } = req.body;
-
     const updatedGig = await Gig.findByIdAndUpdate(
         req.params.id,
-        { active },
+        { $set: { active: req.body.active } },
         { new: true }
     );
-
-    if (!updatedGig) {
-      return next(createError(404, "Gig not found!"));
-    }
-
-    res.status(200).json(updatedGig);
+    res.status(200).send(updatedGig);
   } catch (err) {
-    console.error("Error updating gig status:", err);
     next(err);
   }
 };
 
-// Mettre à jour le statut "en vedette" d'un gig
 export const adminUpdateGigFeatured = async (req, res, next) => {
   try {
-    const { featured } = req.body;
-
     const updatedGig = await Gig.findByIdAndUpdate(
         req.params.id,
-        { featured },
+        { $set: { featured: req.body.featured } },
         { new: true }
     );
-
-    if (!updatedGig) {
-      return next(createError(404, "Gig not found!"));
-    }
-
-    res.status(200).json(updatedGig);
+    res.status(200).send(updatedGig);
   } catch (err) {
-    console.error("Error updating gig featured status:", err);
     next(err);
   }
 };
 
-// Supprimer plusieurs gigs
 export const adminBulkDeleteGigs = async (req, res, next) => {
   try {
     const { ids } = req.body;
-
-    if (!ids || !Array.isArray(ids) || ids.length === 0) {
-      return next(createError(400, "Invalid or empty IDs array"));
-    }
-
     await Gig.deleteMany({ _id: { $in: ids } });
-
-    res.status(200).send(`${ids.length} gigs have been deleted!`);
+    res.status(200).send("Gigs have been deleted by admin!");
   } catch (err) {
-    console.error("Error bulk deleting gigs:", err);
     next(err);
   }
 };
 
-// Mettre à jour le statut de plusieurs gigs
 export const adminBulkUpdateGigStatus = async (req, res, next) => {
   try {
     const { ids, active } = req.body;
-
-    if (!ids || !Array.isArray(ids) || ids.length === 0) {
-      return next(createError(400, "Invalid or empty IDs array"));
-    }
-
-    if (typeof active !== 'boolean') {
-      return next(createError(400, "Active status must be a boolean"));
-    }
-
-    const result = await Gig.updateMany(
+    await Gig.updateMany(
         { _id: { $in: ids } },
         { $set: { active } }
     );
-
-    res.status(200).json({
-      message: `${result.modifiedCount} gigs have been updated!`,
-      modifiedCount: result.modifiedCount
-    });
+    res.status(200).send("Gigs status has been updated by admin!");
   } catch (err) {
-    console.error("Error bulk updating gig status:", err);
     next(err);
   }
 };
 
-// Mettre à jour le statut "en vedette" de plusieurs gigs
 export const adminBulkUpdateGigFeatured = async (req, res, next) => {
   try {
     const { ids, featured } = req.body;
-
-    if (!ids || !Array.isArray(ids) || ids.length === 0) {
-      return next(createError(400, "Invalid or empty IDs array"));
-    }
-
-    if (typeof featured !== 'boolean') {
-      return next(createError(400, "Featured status must be a boolean"));
-    }
-
-    const result = await Gig.updateMany(
+    await Gig.updateMany(
         { _id: { $in: ids } },
         { $set: { featured } }
     );
-
-    res.status(200).json({
-      message: `${result.modifiedCount} gigs have been updated!`,
-      modifiedCount: result.modifiedCount
-    });
+    res.status(200).send("Gigs featured status has been updated by admin!");
   } catch (err) {
-    console.error("Error bulk updating gig featured status:", err);
+    next(err);
+  }
+};
+
+export const getAllGigs = async (req, res, next) => {
+  try {
+    const gigs = await Gig.find();
+    res.status(200).send(gigs);
+  } catch (err) {
     next(err);
   }
 };

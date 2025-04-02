@@ -9,8 +9,8 @@ import {
   adminBulkDeleteGigs,
   adminBulkUpdateGigStatus,
   adminBulkUpdateGigFeatured
-} from "../controllers/gig.controller.js";
-import { verifyToken, verifyAdmin } from "../middleware/jwt.js";
+} from "../../controllers/gig.controller.js";
+import { verifyToken, verifyAdmin } from "../../middleware/jwt.js";
 
 const router = express.Router();
 

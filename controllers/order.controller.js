@@ -53,10 +53,11 @@ export const intent = async (req, res, next) => {
 export const getOrders = async (req, res, next) => {
   //console req
 
+
   try {
     const orders = await Order.find({
       ...(req.isAmbassador ? { AmbassadorId: req.userId } : { GuestId: req.userId }),
-      isCompleted: true,
+
     });
 
     res.status(200).send(orders);

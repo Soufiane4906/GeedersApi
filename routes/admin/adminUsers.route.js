@@ -1,9 +1,9 @@
 import express from "express";
-import { verifyToken, verifyAdmin } from "../middleware/jwt.js";
-import User from "../models/user.model.js";
-import createError from "../utils/createError.js";
+import { verifyToken, verifyAdmin } from "../../middleware/jwt.js";
+import User from "../../models/user.model.js";
+import createError from "../../utils/createError.js";
 import multer from "multer";
-import upload from "../utils/upload.js";
+import upload from "../../utils/upload.js";
 
 const router = express.Router();
 

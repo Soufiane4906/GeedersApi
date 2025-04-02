@@ -8,8 +8,8 @@ import messageRoute from "./routes/message.route.js";
 import reviewRoute from "./routes/review.route.js";
 import authRoute from "./routes/auth.route.js";
 import countryRoutes from "./routes/country.route.js";
-import adminUsersRoutes from "./routes/adminUsers.route.js";
-import adminOrdersRoutes from "./routes/adminOrders.route.js"; // Import the new admin orders route
+import adminUsersRoutes from "./routes/admin/adminUsers.route.js";
+import adminOrdersRoutes from "./routes/admin/adminOrders.route.js"; // Import the new admin orders route
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from 'path';
@@ -17,9 +17,12 @@ import os from 'os';
 import cityRoutes from "./routes/city.route.js";
 import poiRoutes from "./routes/poi.route.js";
 
-import adminRoute from "./routes/admin.route.js";
+import adminRoute from "./routes/admin/admin.route.js";
 import gigRoute from "./routes/gig.route.js";
-import adminGigsRoute from "./routes/adminGigs.route.js";
+import adminGigsRoute from "./routes/admin/adminGigs.route.js";
+import travelStoryRoute from "./routes/travelStory.route.js";
+import languageRoutes from "./routes/language.route.js";
+
 dotenv.config();
 console.log("MONGO_URI:", process.env.MONGO_URI);
 
@@ -59,7 +62,6 @@ app.use(cookieParser());
 app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
 app.use("/api/gigs", gigRoute);
-app.use("/api/admin/gigs", adminGigsRoute);
 app.use("/api/orders", orderRoute);
 app.use("/api/conversations", conversationRoute);
 app.use("/api/messages", messageRoute);
@@ -68,7 +70,9 @@ app.use("/api/countries", countryRoutes);
 app.use("/api/cities", cityRoutes);
 app.use("/api/admin", adminRoute);
 app.use("/api/pois", poiRoutes);
+app.use("/api/languages", languageRoutes);
 app.use("/api/adminUsers", adminUsersRoutes);
+app.use("/api/story", travelStoryRoute);
 app.use("/api/adminOrders", adminOrdersRoutes); // Add the new admin orders route
 app.get("/helo", (req, res) => {
   res.send("Hello, your server is running!");
