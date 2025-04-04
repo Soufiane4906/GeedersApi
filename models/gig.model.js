@@ -85,10 +85,12 @@ const GigSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
-        poi: {
-            type: [String],
-            required: false,
-        },
+        poi: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'POI'  // Référence au modèle POI
+            }
+        ],
         hasCar: {
             type: Boolean,
             default: false,

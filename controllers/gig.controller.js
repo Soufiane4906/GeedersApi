@@ -35,7 +35,7 @@ export const deleteGig = async (req, res, next) => {
 export const getGig = async (req, res, next) => {
   try {
     // Use populate to automatically fetch language details
-    const gig = await Gig.findById(req.params.id).populate('languages');
+    const gig = await Gig.findById(req.params.id).populate('languages').populate('poi');
     if (!gig) return next(createError(404, "Gig not found!"));
 
     res.status(200).send(gig);
@@ -112,7 +112,7 @@ export const getGigs = async (req, res, next) => {
     }
 
     // Use populate to automatically fetch language details
-    const gigs = await Gig.find(filters).populate('languages').sort(sortOption);
+    const gigs = await Gig.find(filters).populate('languages').populate('poi').sort(sortOption);
 
     // Log the number of results found
     console.log(`Found ${gigs.length} gigs matching the criteria`);
@@ -132,11 +132,12 @@ export const updateGig = async (req, res, next) => {
     if (gig.userId !== req.userId)
       return next(createError(403, "You can update only your gig!"));
 
+// Dans la fonction updateGig
     const updatedGig = await Gig.findByIdAndUpdate(
         req.params.id,
         { $set: req.body },
         { new: true }
-    ).populate('languages');
+    ).populate('languages').populate('poi');
 
     res.status(200).send(updatedGig);
   } catch (err) {
@@ -167,9 +168,10 @@ export const getAdminGigs = async (req, res, next) => {
     const sortOptions = {};
     sortOptions[sort] = direction === 'asc' ? 1 : -1;
 
-    // Fetch gigs with pagination and sorting, and populate languages
+// Dans la fonction getAdminGigs
     const gigs = await Gig.find(filter)
         .populate('languages')
+        .populate('poi')
         .sort(sortOptions)
         .skip(skip)
         .limit(limit);
@@ -214,7 +216,7 @@ export const adminUpdateGig = async (req, res, next) => {
         req.params.id,
         { $set: req.body },
         { new: true }
-    ).populate('languages');
+    ).populate('languages').populate('poi');
 
     res.status(200).send(updatedGig);
   } catch (err) {
@@ -228,7 +230,7 @@ export const adminUpdateGigStatus = async (req, res, next) => {
         req.params.id,
         { $set: { active: req.body.active } },
         { new: true }
-    ).populate('languages');
+    ).populate('languages').populate('poi');
 
     res.status(200).send(updatedGig);
   } catch (err) {
@@ -238,11 +240,12 @@ export const adminUpdateGigStatus = async (req, res, next) => {
 
 export const adminUpdateGigFeatured = async (req, res, next) => {
   try {
+// Dans la fonction adminUpdateGigFeatured
     const updatedGig = await Gig.findByIdAndUpdate(
         req.params.id,
         { $set: { featured: req.body.featured } },
         { new: true }
-    ).populate('languages');
+    ).populate('languages').populate('poi');
 
     res.status(200).send(updatedGig);
   } catch (err) {
@@ -289,8 +292,7 @@ export const adminBulkUpdateGigFeatured = async (req, res, next) => {
 export const getAllGigs = async (req, res, next) => {
   try {
     // Use populate to automatically fetch language details
-    const gigs = await Gig.find().populate('languages');
-    res.status(200).send(gigs);
+    const gigs = await Gig.find().populate('languages').populate('poi');    res.status(200).send(gigs);
   } catch (err) {
     next(err);
   }
